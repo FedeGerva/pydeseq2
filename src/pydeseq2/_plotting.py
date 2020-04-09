@@ -87,7 +87,7 @@ def pyPlotDispEsts(dds, wd='.', name='dispersion'):
 
 def pymeanSdPlot(dds, wd='.', name='meanSdPlot'):
     """
-    Dispersion plot
+    meanSd plot
     
     Parameters
     -------
@@ -358,7 +358,7 @@ def pyPlotFilterNumRej(res, s=10, linewidth=0.5, save=None, dpi=300, **kwargs):
 
 def pyPlotHistpvalue(res, res_df, linewidth=0.5, save=None, dpi=300, **kwargs):
     """
-    Plot −log10(pvalues) for all the geans over the normalized mean counts
+    Histogram showing how the filtering ameliorates the multiple testing problem
     
     Parameters
     -------

@@ -41,6 +41,7 @@
 
 # +
 # # Create a new conda environment
+# git clone https://github.com/FedeGerva/pydeseq2
 # conda create --name pyDESeq2_env --file ~/pydeseq2/conda_env/conda_requirements.txt
 
 # #Open conda env
@@ -49,7 +50,7 @@
 # pip install -r ~/pydeseq2/conda_env/1.4.2/pip_requirements.txt #impo rpy2 > 3.2.5 (see https://github.com/rpy2/rpy2/issues/631)
 
 # #install pydeseq2 package
-# pip install -e . ~/pydeseq2
+# pip install -e ~/pydeseq2
 
 # R --vanilla <<code
 # chooseCRANmirror(graphics=FALSE, ind=88) #Italy GARR
