@@ -5,17 +5,43 @@ Description of function to run DESeq2 in python
 
 Install
 -------
-In order to install the development package use `pip`::
 
-#    git clone https://github.com/FedeGerva/pydeseq2.git
-#    cd pydeseq2
-#    pip install -e ~/pydeseq2
+To create a conda environment working with this notebook (containing python, R, rpy, DESeq2 and pydeseq2)::
+
+	# Create a new conda environment
+	git clone https://github.com/FedeGerva/pydeseq2
+	conda create --name pyDESeq2_env --file ~/pydeseq2/conda_env/conda_requirements.txt
+
+	#Open conda env
+	conda activate pyDESeq2_env
+
+	pip install -r ~/pydeseq2/conda_env/1.4.2/pip_requirements.txt #impo rpy2 > 3.2.5 (see https://github.com/rpy2/rpy2/issues/631)
+
+	#In order to install the development package use `pip`
+	cd pydeseq2 
+	pip install -e ~/pydeseq2
+
+	R --vanilla <<code
+	chooseCRANmirror(graphics=FALSE, ind=88) #Italy GARR
+
+	if (!requireNamespace("BiocManager", quietly = TRUE))
+		install.packages("BiocManager")
+	
+	BiocManager::install("GenomeInfoDbData") #version 1.2.2
+	BiocManager::install("pasilla") #version 1.14.0
+	BiocManager::install("vsn") #version 3.54.0
+	code
+
+	ipython kernel install --user --name pyDESeq2_env --display-name "pyDESeq2_env"
 
 Then you can import the library as usual::
 
-    import pydeseq2
+        import pydeseq2
 
 ===========
+
+Description
+-----------
 
 Nowadays, it is becoming more clear the fundamental role of flexibility between programming languages in bioinformatics analysis. In fact, there are new packages that allow to call functions written in one language from another language. One of the most know package is rpy2(https://rpy.sourceforge.io/rpy2/doc-dev/html/overview.html) which allow to use R function and call R object directly in a Python environment. These packages are of major importance because they allow the users to reuse existing code and perform analysis integrating different scripting languages.
 
