@@ -7,7 +7,7 @@ Install
 -------
 In order to install the development package use `pip`::
 
-#    git clone http://git.ingm.ad/core/pydeseq2.git
+#    git clone https://github.com/FedeGerva/pydeseq2.git 
 #    cd pydeseq2
 #    pip install -e ~/pydeseq2
 
