@@ -15,7 +15,7 @@ To create a conda environment working with this notebook (containing python, R, 
 	#Open conda env
 	conda activate pyDESeq2_env
 
-	pip install -r ~/pydeseq2/conda_env/1.4.2/pip_requirements.txt #impo rpy2 > 3.2.5 (see https://github.com/rpy2/rpy2/issues/631)
+	pip install -r ~/pydeseq2/conda_env/pip_requirements.txt 
 
 	#In order to install the development package use `pip`
 	cd pydeseq2 
