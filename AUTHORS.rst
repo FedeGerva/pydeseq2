@@ -2,4 +2,4 @@
 Contributors
 ============
 
-* Federica Gervasoni <gervasoni@ingm.org>
+* Federica Gervasoni <federica.gervasoni@unimi.it>

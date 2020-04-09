@@ -1,16 +1,16 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-    Setup file for pydeseq2.
-    Use setup.cfg to configure your project.
 
-    This file was generated with PyScaffold 3.2.3.
-    PyScaffold helps you to put up the scaffold of your new Python project.
-    Learn more under: https://pyscaffold.org/
-"""
+"""The setup script."""
+
 import sys
-
 from pkg_resources import VersionConflict, require
 from setuptools import setup
+
+from setuptools import setup, find_packages
+
+with open('README.rst') as readme_file:
+    readme = readme_file.read()
 
 try:
     require('setuptools>=38.3')
@@ -18,6 +18,14 @@ except VersionConflict:
     print("Error: version of setuptools is too old (<38.3)!")
     sys.exit(1)
 
-
-if __name__ == "__main__":
-    setup(use_pyscaffold=True)
+setup(name='pydeseq2',
+      version='0.1',
+      description='python package to run DESeq2 in python',
+      long_description=readme,
+      author='Federica Gervasoni',
+      author_email='federica.gervasoni@unimi.it',
+      license='Apache Software License 2.0',
+      packages=find_packages(include=['pydeseq2']),
+      python_requires='>=3.7',
+      include_package_data=True,
+      zip_safe=False)
