@@ -48,3 +48,8 @@ MANIFEST
 
 # Per-project virtualenvs
 .venv*/
+
+#created objects
+*.rds
+*.csv
+*.png
