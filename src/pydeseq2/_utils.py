@@ -129,6 +129,47 @@ def pyrVarStabTionformation(dds, file_vsd='vsd.rds', blind=True, nsub = 1000, fi
     return vsd
 
 
+def pyCreateLibSizedf(dds, coldata):
+    """
+    Create dataframe with size factors and coldata info
+
+    Parameters
+    -------
+    input:
+    dds
+        DESeqDataSet object
+    coldata
+        dataframe with samples annotation
+    """
+    import numpy as np
+    import pandas as pd
+    import rpy2
+    import rpy2.robjects as robjects
+    from rpy2.robjects.packages import importr
+    from rpy2.rinterface import SexpS4
+    counts=robjects.r['counts']
+    colnames=robjects.r['colnames']
+    rownames=robjects.r['rownames']
+    sizeFactors=robjects.r['sizeFactors']
+
+    if isinstance(dds, SexpS4):
+    
+        ##dds row count matrix
+        dds_counts=pd.DataFrame(np.matrix(counts(dds)), columns = colnames(dds), index=rownames(dds))
+
+        ##df with info
+        data= {'sizeFactors': sizeFactors(dds),
+               'libSize': dds_counts.sum().round(2).div(10^6)
+              }
+        df = pd.DataFrame(data, columns = ['sizeFactors', 'libSize'], index=colnames(dds))
+        df=df.merge(coldata, left_index=True, right_index=True)
+        
+    else:
+        raise Exception("dds is not an object of class rpy2.robjects.methods.RS4")
+
+    return df
+
+
 def pyresults(dds, save=None, wd='.', name='res_table', index_label='gene_id', **kwargs):
     """
     Extracts a result table from a DESeq analysis giving base means across samples, log2 fold changes, standard errors, test statistics, p-values and adjusted p-values. 
@@ -161,6 +202,7 @@ def pyresults(dds, save=None, wd='.', name='res_table', index_label='gene_id', *
     import rpy2.robjects as robjects
     from rpy2.robjects.packages import importr
     from rpy2.rinterface import SexpS4
+    robjects.numpy2ri.activate()
     deseq = importr('DESeq2') #import deseq2 
     to_dataframe = robjects.r('function(x) data.frame(x)')
     rownames=robjects.r['rownames']
