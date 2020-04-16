@@ -151,6 +151,8 @@ def pyPlotPCA(rld, intgroup_name=None, n_top=500, ncompx=1, ncompy=2, alpha=0.7,
     import matplotlib.pyplot as plt
     import pandas as pd
     from numpy import transpose
+    import matplotlib.colors as colors
+    import matplotlib.cm as cmx
     import rpy2.robjects as robjects
     assay = robjects.r['assay']
     rownames=robjects.r['rownames']
@@ -187,23 +189,45 @@ def pyPlotPCA(rld, intgroup_name=None, n_top=500, ncompx=1, ncompy=2, alpha=0.7,
     df = pd.DataFrame(data=d)
 
     ##PlotPCA
-    fig, (ax) = plt.subplots(1,1,figsize=(3, 3),dpi=300)
-    ax.scatter(df['PC1'], df['PC2'], color=[Dictcmap.get(x,"No_key") for x in np.array(df['group'])], 
-               alpha=alpha, s=s, linewidth=linewidth, **kwargs)
+    
+    if Dictcmap:
+        fig, (ax) = plt.subplots(1,1,figsize=(3, 3),dpi=300)
+        ax.scatter(df['PC1'], df['PC2'], color=[Dictcmap.get(x,"No_key") for x in np.array(df['group'])], 
+                   alpha=alpha, s=s, linewidth=linewidth, **kwargs)
 
-    ##axis
-    #retrieve values from color dictionary and attribute it to corresponding labels
-    leg_color=list(set([Dictcmap.get(x,"No_key") for x in np.array(df['group'])]))
-    inv_Dictcmap = {v: k for k, v in Dictcmap.items()}
-    leg_group=[inv_Dictcmap[k] for k in list(set([Dictcmap.get(x,"No_key") for x in np.array(df['group'])]))]
-    sub_Dictcmap=dict((k, Dictcmap[k]) for k in leg_group)
+        ##axis
+        #retrieve values from color dictionary and attribute it to corresponding labels
+        leg_color=list(set([Dictcmap.get(x,"No_key") for x in np.array(df['group'])]))
+        inv_Dictcmap = {v: k for k, v in Dictcmap.items()}
+        leg_group=[inv_Dictcmap[k] for k in list(set([Dictcmap.get(x,"No_key") for x in np.array(df['group'])]))]
+        sub_Dictcmap=dict((k, Dictcmap[k]) for k in leg_group)
 
-    leg_el = [mpatches.Patch(facecolor = leg_color, edgecolor = "black", label = leg_group, alpha = 0.4) for leg_group, leg_color in sub_Dictcmap.items()]
-    ax.legend(handles = leg_el, loc='upper center', bbox_to_anchor=(0.3, 0.8, 0.5, 0.5), frameon=False, fontsize='xx-small')
+        leg_el = [mpatches.Patch(facecolor = leg_color, edgecolor = "black", label = leg_group, alpha = 0.4) for leg_group, leg_color in sub_Dictcmap.items()]
+        ax.legend(handles = leg_el, loc='upper center', bbox_to_anchor=(0.3, 0.8, 0.5, 0.5), frameon=False, fontsize='xx-small')
 
-    ax.set_xlabel(str(round(percentVar[ncompx-1]*100, 2))+ '% PC'+ str(ncompx), size=10)
-    ax.set_ylabel(str(round(percentVar[ncompy-1]*100, 2))+ '% PC'+ str(ncompy), size=10)
-    ax.tick_params(axis='both', which='major', labelsize=5)
+        ax.set_xlabel(str(round(percentVar[ncompx-1]*100, 2))+ '% PC'+ str(ncompx), size=10)
+        ax.set_ylabel(str(round(percentVar[ncompy-1]*100, 2))+ '% PC'+ str(ncompy), size=10)
+        ax.tick_params(axis='both', which='major', labelsize=5)
+        
+    else:
+        fig, (ax) = plt.subplots(1,1,figsize=(3, 3),dpi=300)
+        uniq = list(set(df['group']))
+
+        # Set the color map to match the number of species
+        z = range(1,len(uniq))
+        hot = plt.get_cmap('hsv')
+        cNorm  = colors.Normalize(vmin=0, vmax=len(uniq))
+        scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=hot)
+
+        # Plot each species
+        for i in range(len(uniq)):
+            indx = df['group'] == uniq[i]
+            ax.scatter(df['PC1'][indx], df['PC2'][indx], s=15, color=scalarMap.to_rgba(i), label=uniq[i])
+
+        plt.legend(loc='upper center', bbox_to_anchor=(0.3, 0.8, 0.5, 0.5), frameon=False, fontsize='xx-small')
+        ax.set_xlabel(str(round(percentVar[ncompx-1]*100, 2))+ '% PC'+ str(ncompx), size=10)
+        ax.set_ylabel(str(round(percentVar[ncompy-1]*100, 2))+ '% PC'+ str(ncompy), size=10)
+        ax.tick_params(axis='both', which='major', labelsize=5)     
     
     if save:
         plt.savefig(save, dpi=dpi)
