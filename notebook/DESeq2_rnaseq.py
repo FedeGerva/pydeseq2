@@ -93,7 +93,7 @@ import os
 jupiter_dir="/jupyterminiconda3" #name of the directory in which conda is saved
 from pathlib import Path
 home = str(Path.home())
-os.environ['R_HOME']=os.path.join(home + jupiter_dir + "/envs/pyDESeq2/lib/R/")
+os.environ['R_HOME']=os.path.join(home + jupiter_dir + "/envs/pyDESeq2_env/lib/R/")
 
 ##Import rpy2
 import rpy2.robjects as robjects
@@ -105,7 +105,6 @@ from rpy2.robjects import Formula
 
 ##to convert pandas df in r df
 from rpy2.robjects.conversion import localconverter
-from rpy2.robjects.packages import importr
 from rpy2.robjects import pandas2ri
 import rpy2.robjects as ro
 
@@ -183,7 +182,7 @@ cts=pd.read_table(pasCts[0],sep="\t",header=0,index_col=0,dtype="str") #import c
 cts=cts.apply(pd.to_numeric)
 
 coldata=pd.read_csv(pasAnno[0],index_col=0) #import coldata information
-coldata=coldata[["condition","type"]]
+# coldata=coldata[["condition","type"]]
 # -
 
 ##Print head of the count table
@@ -241,22 +240,16 @@ print(dds)
 #
 # The size factor is calculated using _sizeFactors_ function of DESeq2 and the correlation between size factor and library size is shown in the associated plot.
 
-# +
 print('size factors: ')
 print(sizeFactors(dds))
 
-##dds row count matrix
-dds_counts=pd.DataFrame(np.matrix(counts(dds)), columns = colnames(dds), index=rownames(dds))
+# +
+#Create df with libsize info and annotation
+libSize_df=pydeseq2.pyCreateLibSizedf(dds, coldata=coldata)
 
-##df with info
-data= {'sizeFactors': sizeFactors(dds),
-       'libSize': dds_counts.sum().round(2).div(10^6)
-      }
-libSize_df = pd.DataFrame(data, columns = ['sizeFactors', 'libSize'], index=colnames(dds))
-libSize_df=libSize_df.merge(coldata, left_index=True, right_index=True)
-# -
-
+#Plot
 pydeseq2.pyPlotLibSizeFact(libSize_df, color='condition', Dictcmap=TCcmap)
+# -
 
 # ### Dispersion plot and fitting alternatives
 #
@@ -281,7 +274,7 @@ for i in dds_obj:
 #
 # PCA and clustering plot are made combining R and python functions. 
 
-pydeseq2.pyPlotPCA(rld, intgroup_name=['condition', 'type'], Dictcmap=TCcmap, ncompx=1, ncompy=2)
+pydeseq2.pyPlotPCA(rld, intgroup_name=['condition', 'type'],  ncompx=1, ncompy=2)
 
 # ### Clustering
 
