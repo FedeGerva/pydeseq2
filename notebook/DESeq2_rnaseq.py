@@ -74,17 +74,15 @@
 # #### Import python modules
 
 # +
-from numpy.random import multinomial, random
+# from numpy.random import multinomial, random
 import numpy as np
 from numpy import *
-from IPython.display import Image, display
 from matplotlib.ticker import FuncFormatter
 from matplotlib import collections  as mc
 import matplotlib.patches as mpatches
 from matplotlib.patches import Patch
 import matplotlib.pyplot as plt
 import seaborn as sns; sns.set(color_codes=True)
-from scipy.spatial import distance_matrix
 import pandas as pd
 import os.path
 import os
@@ -102,11 +100,6 @@ robjects.numpy2ri.activate()
 # %load_ext rpy2.ipython
 from rpy2.robjects.packages import importr
 from rpy2.robjects import Formula
-
-##to convert pandas df in r df
-from rpy2.robjects.conversion import localconverter
-from rpy2.robjects import pandas2ri
-import rpy2.robjects as ro
 
 ##Import pydeseq2 package
 import pydeseq2
@@ -165,25 +158,31 @@ TCcmap={'untreated:single-read': '#66c2a5','untreated:paired-end': '#fc8d62', 't
         'single-read':'#110AEA','paired-end':'#cc0000',
        } 
 
+
 # ### Import count matrix and samples information
 #
 # The toy dataset chosen to run this tutorial is the count data from [Pasilla](http://bioconductor.org/packages/release/data/experiment/html/pasilla.html) package since it was the one chose by DESeq2 tutorial, making it easier to compare and follow.
 
 # +
-pasCts=system_file("extdata", 
-                   "pasilla_gene_counts.tsv", 
-                   package="pasilla", mustWork=True)
-pasAnno=system_file("extdata",
-                   "pasilla_sample_annotation.csv",
-                   package="pasilla", mustWork=True)
+##definition of functions to import objects. These functions are not in the package to be more flexible
+def importCts(pathCts):
+    """imort count matrix as pandas df"""
+    cts=pd.read_table(pathCts[0], sep="\t", header=0, index_col=0, dtype="str")
+    cts=cts.apply(pd.to_numeric)
+    return cts
 
-##Import count matrix and specify numeric type.
-cts=pd.read_table(pasCts[0],sep="\t",header=0,index_col=0,dtype="str") #import count matrix
-cts=cts.apply(pd.to_numeric)
+def importColdata(pathColdata, pathCts):
+    """imort sample annotation as pandas df"""
+    coldata=pd.read_csv(pathColdata[0],index_col=0) #import coldata information
+    coldata.index=coldata.index.str.replace(r'fb$', '')
+    coldata=coldata.loc[importCts(pathCts).columns]
+    return coldata
 
-coldata=pd.read_csv(pasAnno[0],index_col=0) #import coldata information
-# coldata=coldata[["condition","type"]]
+
 # -
+
+cts=importCts(system_file("extdata", "pasilla_gene_counts.tsv", package="pasilla", mustWork=True))
+coldata=importColdata(system_file("extdata", "pasilla_sample_annotation.csv", package="pasilla", mustWork=True), system_file("extdata", "pasilla_gene_counts.tsv", package="pasilla", mustWork=True))
 
 ##Print head of the count table
 pd.DataFrame(cts).head()
@@ -215,16 +214,8 @@ file_vsd = os.path.join(wd, "vst_"+ name+ ".rds")
 keep=np.sum(cts,axis=1) >= 10
 cts=cts[keep]
 
-# +
-##convert from pandas to r dataframe
-##specify that eah entry it's a number - if not added is converted in str
-with localconverter(ro.default_converter + pandas2ri.converter):
-  r_cts = ro.conversion.py2rpy(cts)
-
-##convert from pandas to r dataframe
-with localconverter(ro.default_converter + pandas2ri.converter):
-  r_coldata = ro.conversion.py2rpy(coldata)
-# -
+##convert cts and coldata from pandas to r dataframe - you can also pass numpy array and skip this process
+r_cts, r_coldata=pydeseq2.pyConvertPandas(cts, coldata)
 
 # ### Create or load dds/rld/vsd files
 #
@@ -248,7 +239,7 @@ print(sizeFactors(dds))
 libSize_df=pydeseq2.pyCreateLibSizedf(dds, coldata=coldata)
 
 #Plot
-pydeseq2.pyPlotLibSizeFact(libSize_df, color='condition', Dictcmap=TCcmap)
+pydeseq2.pyPlotLibSizeFact(libSize_df, save='libsize.png')
 # -
 
 # ### Dispersion plot and fitting alternatives
@@ -274,11 +265,11 @@ for i in dds_obj:
 #
 # PCA and clustering plot are made combining R and python functions. 
 
-pydeseq2.pyPlotPCA(rld, intgroup_name=['condition', 'type'],  ncompx=1, ncompy=2)
+pydeseq2.pyPlotPCA(rld, intgroup_name=['type', 'condition'])
 
 # ### Clustering
 
-pydeseq2.pyPlotClustering(rld, coldata, intgroup_name=['type', 'condition'], Dictcmap=TCcmap)
+pydeseq2.pyPlotClustering(rld, coldata, intgroup_name=['type'] )
 
 # ### Differential analysis
 #
@@ -340,7 +331,7 @@ pydeseq2.pyPlotMA(res_df, n_padj=0.1, ylim=4)
 
 # ### Volcano plot
 
-pydeseq2.pyPlotVolcano(res_df, n_padj=0.1, ylim_max=40, xlim=2)
+pydeseq2.pyPlotVolcano(res_df,  n_padj=0.1, ylim_max=40, xlim=2)
 
 # +
 n_log2FC=0
@@ -357,6 +348,8 @@ print(shape(diff_down)[0])
 
 # ### Boxplot of differentially upregulated/downregulated of genes-intervals - normalized counts
 
+norm_filt_melt[['gene_id','variable', 'value','condition', 'type']]
+
 # +
 norm_count=counts(dds, normalized=True) #extract normalized count matrix 
 norm_count=pd.DataFrame(np.matrix(norm_count), index=rownames(dds), columns=colnames(dds))
@@ -372,7 +365,7 @@ norm_filt_melt=pd.merge(norm_filt_melt, coldata,  on='variable')
 fig, (boxPlot_counts) = plt.subplots(1,1,figsize=(3, 3),dpi=300)
 
 ##plot
-norm_filt_melt.boxplot(by=['condition'], ax=boxPlot_counts, grid=False, notch=True, showfliers=False, patch_artist=True)
+norm_filt_melt[['value','condition']].boxplot(by=['condition'], ax=boxPlot_counts, grid=False, notch=True, showfliers=False, patch_artist=True)
 
 ##axis
 boxPlot_counts.set_title('')
@@ -461,3 +454,5 @@ dds_myclass
 type(dds_myclass)
 
 tuple(dds_myclass.slotnames())
+
+
