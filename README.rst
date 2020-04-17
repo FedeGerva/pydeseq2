@@ -38,7 +38,7 @@ Then you can import the library as usual::
 
         import pydeseq2
 
-The test are run using ipytest (https://pypi.org/project/ipytest/)
+The tests are run using ipytest (https://pypi.org/project/ipytest/)
 
 ===========
 
