@@ -16,7 +16,7 @@ __email__ = 'federica.gervasoni@unimi.it'
 __version__ = '0.1.0'
 
 #"""Utils"""
-from ._utils import pyDESeqDataSetFromMatrix, pyrlogTransformation, pyrVarStabTionformation, pyCreateLibSizedf, pyresults
+from ._utils import pyConvertPandas, pyDESeqDataSetFromMatrix, pyrlogTransformation, pyrVarStabTionformation, pyCreateLibSizedf, pyresults
 
 #""" Plotting """
 from ._plotting import pyPlotLibSizeFact

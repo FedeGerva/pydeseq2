@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-def pyPlotLibSizeFact(df, color='black', alpha=0.7, s=30, linewidth=0.5, Dictcmap=None, save=None, dpi=300,  **kwargs):
+def pyPlotLibSizeFact(df, intgroup_name=None, alpha=0.7, s=30, linewidth=0.5, Dictcmap=None, save=None, dpi=300,  **kwargs):
     """
     Plot a scatter with the correlation between sizeFactor and library size
     
@@ -25,18 +25,34 @@ def pyPlotLibSizeFact(df, color='black', alpha=0.7, s=30, linewidth=0.5, Dictcma
     ##library
     import matplotlib.pyplot as plt
     import numpy as np
+    import matplotlib.colors as colors
+    import matplotlib.cm as cmx
     
     plt.style.use('default')
-    
+
     ##plot
-    colorPlot=np.array([color])
+    intgroup=np.array([intgroup_name])
 
     ##plot
     fig, (ax) = plt.subplots(1,1,figsize=(3, 3),dpi=300, gridspec_kw={'width_ratios':[1]})
 
-    if colorPlot != 'black':
-        ax.scatter(df['libSize'], df['sizeFactors'], color=[Dictcmap.get(x,"No_key") for x in np.array(df[colorPlot[0]])],
+    if Dictcmap and intgroup:
+        ax.scatter(df['libSize'], df['sizeFactors'], color=[Dictcmap.get(x,"No_key") for x in np.array(df[intgroup[0]])],
             alpha=alpha, s=s, linewidth=linewidth, **kwargs)
+
+    elif intgroup:
+        uniq = list(set(df[intgroup[0]]))
+
+        # Set the color map to match the number of species
+        z = range(1,len(uniq))
+        hot = plt.get_cmap('hsv')
+        cNorm  = colors.Normalize(vmin=0, vmax=len(uniq))
+        scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=hot)
+
+        # Plot each species
+        for i in range(len(uniq)):
+            indx = df[intgroup[0]] == uniq[i]
+            ax.scatter(df['libSize'][indx],  df['sizeFactors'][indx], s=15, color=scalarMap.to_rgba(i), label=uniq[i])
 
     else:
         ax.scatter(df['libSize'], df['sizeFactors'], color='black',
@@ -50,7 +66,7 @@ def pyPlotLibSizeFact(df, color='black', alpha=0.7, s=30, linewidth=0.5, Dictcma
     ##add lm info
     m, b = np.polyfit(df['libSize'], df['sizeFactors'], 1) #calculate lm
     ax.plot(df['libSize'], m*df['libSize'] + b, color='red',  linewidth=1) #add line
-    
+
     if save:
         plt.savefig(save, dpi=dpi)
     
@@ -277,7 +293,7 @@ def pyPlotClustering(rld, coldata, intgroup_name=None, Dictcmap=None, save=None,
     rld_t_table=pd.DataFrame(transpose(assay(rld)), index=colnames(rld), columns=rownames(rld))
     dist_mtx=pd.DataFrame(distance_matrix(rld_t_table.values, rld_t_table.values), index=colnames(rld), columns=colnames(rld))
  
-    if Dictcmap:    
+    if Dictcmap and intgroup_name:    
         ##plot
         g=sns.clustermap(dist_mtx, cmap="mako", row_colors=[Dictcmap.get(x,"No_key") for x in coldata.reindex(np.array(dist_mtx.index))[intgroup]],
                       yticklabels=True, xticklabels=True, **kwargs)
@@ -288,7 +304,19 @@ def pyPlotClustering(rld, coldata, intgroup_name=None, Dictcmap=None, save=None,
                                     label=label, linewidth=0)
         
         g.ax_col_dendrogram.legend(loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.4), frameon=False) ##legend label position
- 
+        
+    elif intgroup_name:
+        lut = dict(zip(coldata[intgroup].unique(), "rbg"))
+        row_colors = coldata[intgroup].map(lut)
+
+        g=sns.clustermap(dist_mtx, cmap="mako", row_colors=row_colors, label=coldata[intgroup], yticklabels=True, xticklabels=True)
+        
+        for label in coldata[intgroup].unique():
+            g.ax_col_dendrogram.bar(0, 0, color=lut[label],
+                                    label=label, linewidth=0)
+        
+        g.ax_col_dendrogram.legend(loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.4), frameon=False) ##legend label position
+
     else:
         g=sns.clustermap(dist_mtx, cmap="mako",
                   yticklabels=True, xticklabels=True)
@@ -298,7 +326,7 @@ def pyPlotClustering(rld, coldata, intgroup_name=None, Dictcmap=None, save=None,
     if save:
         g.savefig(save, dpi=dpi)
 
-def pyPlotMeannormCount_lg10pval(df, alpha=0.7, s=10, linewidth=0.5, save=None, dpi=300, **kwargs):
+def pyPlotMeannormCount_lg10pval(df, ymax=30, alpha=0.7, s=10, linewidth=0.5, save=None, dpi=300, **kwargs):
     """
     Plot −log10(pvalues) for all the geans over the normalized mean counts
     
@@ -331,7 +359,7 @@ def pyPlotMeannormCount_lg10pval(df, alpha=0.7, s=10, linewidth=0.5, save=None, 
     ax.set_xlabel('mean of normalized counts', size=10)
     ax.set_ylabel('-log10(pvalue)', size=10)
     ax.tick_params(axis='both', which='major', labelsize=5)
-    ax.set_ylim(0,30)
+    ax.set_ylim(0, ymax)
     ax.set_xscale('log')
     
     if save:

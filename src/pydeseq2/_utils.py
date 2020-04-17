@@ -1,3 +1,32 @@
+def pyConvertPandas(cts, coldata):
+    """
+    Convert pandas df in r dataframe
+
+    Parameters
+    -------
+    input:
+    cts
+        count matrix
+    coldata
+        dataframe with sample information
+    """
+    
+    import rpy2
+    import rpy2.robjects as robjects
+    from rpy2.robjects.packages import importr
+    from rpy2.robjects.conversion import localconverter
+    from rpy2.robjects import pandas2ri
+    import rpy2.robjects as ro
+    
+    with localconverter(ro.default_converter + pandas2ri.converter):
+        r_cts = ro.conversion.py2rpy(cts)
+        
+    with localconverter(ro.default_converter + pandas2ri.converter):
+        r_coldata = ro.conversion.py2rpy(coldata)
+    
+    return r_cts, r_coldata
+
+
 def pyDESeqDataSetFromMatrix(cts, coldata, design=None, file_dds='dds.rds', **kwargs):
     """
     Create and import dds object
