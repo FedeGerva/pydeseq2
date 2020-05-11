@@ -16,7 +16,7 @@
 
 # ## DESeq2 in python - pydeseq2
 
-# Nowadays, it is becoming more clear the fundamental role of flexibility between programming languages in bioinformatics analysis. In fact, there are new packages that allow to call functions written in one language from another language. One of the most know package is [rpy2](https://rpy.sourceforge.io/rpy2/doc-dev/html/overview.html) which allow to use R function and call R object directly in a Python environment. These packages are of major importance because they allow the users to reuse existing code and perform analysis integrating different scripting languages.
+# Nowadays, it is becoming more clear the fundamental role of flexibility between programming languages in bioinformatics analysis. In fact, there are new packages that allow to call functions written in one scripting language from another language. One of the most know package is [rpy2](https://rpy.sourceforge.io/rpy2/doc-dev/html/overview.html) which allows to use R function and call R object directly in a Python environment. These packages are of major importance because they allow the users to reuse existing code and perform analysis integrating different scripting languages.
 #
 # The bioinformatics community is growing and evolving day by day searching for new solutions that guarantee reproducibility, scalability and flexibility. A huge amount of bioinformatics tools developed in past are written in R language. However, in the last few years, python is emerged as a new promising languages for bioinformatics analysis, since it reduces the time and resources of the analysis. One of the most used bioinformatics packages for the NGS analysis (including RNA-seq, ChIP-seq, ATAC-seq, Hi-C etc) is [DESeq2](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8). This package is part of the [Bioconductor project](https://www.bioconductor.org/) and it’s written in R language.
 #
@@ -31,7 +31,6 @@
 # * Create a tutorial for DESeq2 analysis in Python using rpy2 package. This tutorial has been tested on RNA-seq and ATAC-seq data.
 # * Replicate the analysis reported in DESeq2 [vignette]( https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html)
 # * Reimplement DESeq2 canonical plots in python using [Matplotlib](https://matplotlib.org/) and [Seaborn](https://seaborn.pydata.org/)
-# * Reduce the running time to produce DESeq2 object (such as dds and rld)
 # * Create a mini-package to run all the commands
 
 # ### Create conda environment
